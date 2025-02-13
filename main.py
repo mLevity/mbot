@@ -59,7 +59,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             conn.commit()
             cursor.execute("UPDATE users SET balance = 10.0 WHERE telegram_id = ?", (user_id,))
             conn.commit()
-            await send_message(
+            await context.bot.send_message(
                 chat_id = referrer_id,
                 text = f"🎉You have a new referral user!\n✅You received a $1 bonus"
             )
