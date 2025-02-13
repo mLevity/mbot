@@ -27,7 +27,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
     total_deposits REAL DEFAULT 0,
     tariff TEXT DEFAULT 'base',
     days_left INTEGER DEFAULT 0,
-    earnings REAL DEFAULT 0
+    earnings REAL DEFAULT 0,
+    total_withdraws REAL DEFAULT 0
 )''')
 
 
