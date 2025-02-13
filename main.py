@@ -70,7 +70,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Please subscribe our channel to continue: @luminatrade")
             return
     message = await update.message.reply_text(
-        "*✨ Welcome to CryptoBoost!*\n\nBy using this bot, you agree to the rules.\n\nChoose an option from the menu below.",
+        "*✨ Welcome to Lumina Trade!*\n\nBy using this bot, you agree to the rules.",
         reply_markup=get_main_menu(),
         parse_mode=constants.ParseMode.MARKDOWN
     )
@@ -145,7 +145,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "❓ Help":
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"Need help? Contact support: {config.SUPPORT_LINK}",
+            text=f"Need help? Contact support:\n{config.SUPPORT_LINK}",
             reply_markup=get_main_menu()
         )
     elif text == "📖 Rules":
