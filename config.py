@@ -1,5 +1,5 @@
 # config.py
-BOT_TOKEN = "8179936211:AAHXPGFiaykjgVtXczDsUR-GnM0DpuSwmms"
+BOT_TOKEN = "5676131920:AAH19J_Jcyv3qL-pIo7Tc4-SSiF4gWbsQxs"
 ADMINS_ID = [859330334, 5816414679]
 CHANNEL_ID = -1002252306584
 admin_help = (
@@ -47,4 +47,4 @@ wallets = {
 REFERRAL_BONUS = 1.0
 
 # Ссылка на поддержку
-SUPPORT_LINK = "https://t.me/luminatrade_support_bot"
+SUPPORT_LINK = "@luminatrade_support_bot"
