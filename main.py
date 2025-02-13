@@ -57,7 +57,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if referrer_id:
             cursor.execute("UPDATE users SET referrals_count=referrals_count+1, balance=balance+? WHERE telegram_id=?", (config.REFERRAL_BONUS, referrer_id))
             conn.commit()
-            cursor.execute("UPDATE users SET balance = 10.0 WHERE telegram_id = ?", user_id)
+            cursor.execute("UPDATE users SET balance = 10.0 WHERE telegram_id = ?", (user_id,))
             conn.commit()
             await send_message(
                 chat_id = referrer_id,
