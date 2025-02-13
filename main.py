@@ -63,7 +63,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text = f"🎉You have a new referral user!\n✅You received a $1 bonus"
             )
             await update.message.reply_text(f"🎉 You registered via a referral link! Your referrer received a ${config.REFERRAL_BONUS} bonus.\n✅You received a $10 welcome-bonus")
-            
+
     chat_member = await context.bot.get_chat_member(chat_id=config.CHANNEL_ID, user_id=user_id)
     if chat_member.status not in ['member', 'administrator', 'creator']:
             await update.message.reply_text("Please subscribe our channel to continue: @luminatrade")
@@ -121,6 +121,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'confirm_payment':
         currency = context.user_data.get('currency')
         amount = context.user_data.get('amount')
+        print(currency)
         wallet_address = config.wallets[currency]
 
         if not all([currency, amount, wallet_address]):
@@ -222,7 +223,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📊 *Total Deposits:* ${total_deposits}\n" \
                 f"📈 *Earnings:* ${earnings}\n" \
                 f"💰 *Total withdrawals:* ${total_withdraws}",
-            reply_markup=get_main_menu(),
             parse_mode=constants.ParseMode.MARKDOWN
         )
 
@@ -347,7 +347,6 @@ async def handle_deposit_withdraw_amount(update: Update, context: ContextTypes.D
             )
 
             context.user_data.pop('is_withdrawal', None)
-            context.user_data.pop('withdraw_currency', None)
 
         except ValueError:
             await context.bot.send_message(
@@ -395,7 +394,7 @@ async def handle_deposit_withdraw_amount(update: Update, context: ContextTypes.D
                     reply_markup=InlineKeyboardMarkup(keyboard),
                     parse_mode=constants.ParseMode.MARKDOWN
                 )
-
+            context.user_data.pop('is_deposit', None)
         except ValueError:
             await context.bot.send_message(
                 chat_id=update.message.chat_id,
