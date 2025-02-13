@@ -118,7 +118,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         referral_link = f"https://t.me/{context.bot.username}?start={user_id}"
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"*👥 Your referral link:*\n`{referral_link}`\n\n\n *Get 1$ for every user entered with your link!\nMore bonuses for tiktok and reels (contact support)*",
+            text=f"*👥 Your referral link:*\n`{referral_link}`\n\n*Get 1$ for every user entered with your link!*",
             reply_markup=get_main_menu(),
             parse_mode=constants.ParseMode.MARKDOWN
         )
@@ -262,7 +262,8 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode=constants.ParseMode.MARKDOWN
             )
 
-        #await update.message.reply_text("Неизвестная команда. Пожалуйста, используйте кнопки.")
+    else:
+        await update.message.reply_text("Unknown command. PLease use buttons")
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -368,7 +369,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             conn.commit()
             await query.message.reply_text(message)
         else:
-            await query.message.reply_text("⚠️*Insufficient funds on your balance!*")
+            await query.message.reply_text("⚠️Insufficient funds on your balance!")
         get_main_menu()
     elif query.data == 'back_to_main':
         await context.bot.send_message(
