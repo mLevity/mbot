@@ -91,12 +91,6 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
-
-    cursor.execute("SELECT balance,tariff, days_left, referrals_count, referral_earnings, total_deposits,  earnings, total_withdraws FROM users WHERE telegram_id=?", (user_id,))
-    balance,tariff, days_left, referrals_count, referral_earnings, total_deposits, earnings, total_withdraws = cursor.fetchone()
-    percent = config.tariffs[tariff]
-    if days_left == 0:
-        days_left = '∞'
     if text == "💸 Withdraw":
         user_data['state'] = 'withdraw'
         await context.bot.send_message(
@@ -536,13 +530,19 @@ async def view_all_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS_ID:
         await update.message.reply_text("❌ Access denied.")
         return
+    print('1')
     cursor.execute("SELECT username, balance, total_deposits FROM users")
     users = cursor.fetchall()
+    print(users)
     if users:
         message = "📝 Список всех пользователей:\n\n"
         for user in users:
             username, balance, total_deposits = user
             message += f"Username: @{username};Баланс: {balance}$; Общие депозиты: {total_deposits} $\n\n"
+            await context.bot.send_message(
+                chat_id=update.effective_user.id,
+                text = message
+            )
         else:
             message = ",No users found."
 async def edit_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -641,8 +641,7 @@ def main():
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('admin_lvt', admin_panel))
     application.add_handler(CommandHandler('view_user', view_user))
-    application.add_handler(CommandHandler('view_user', view_all_users))
-    
+    application.add_handler(CommandHandler('view_all_users', view_all_users))
     application.add_handler(CommandHandler('edit_user', edit_user))
     application.add_handler(CommandHandler('delete_user', delete_user))
     application.add_handler(CommandHandler('message', send_message))
