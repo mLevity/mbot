@@ -6,12 +6,11 @@ admin_help = (
         "🔒 Admin commands:\n"
         "/view_user [telegram_id|username] - Чекнуть юзера\n"
         "/edit_user [telegram_id|username] [field] [value] - ПЕРЕД ИЗМЕНЕИЕМ ПОСМОТРИ ПОЛЯ ЮЗЕРА\n"
-        "/view_all_users Чекнуть всех юзеров"
+        "/view_all_users Чекнуть всех юзеров\n"
         "/delete_user [telegram_id|username] - Delete user\n"
         "/message [telegram_id|username] [message] - Send message to user\n"
         "/message_all [message] - Рассылка\n"
         "/daily - Начислить проценты"
-        ""
     )
 bonuses_text = (
     "🎥 *Make a TikTok or Reels about our bot and earn REAL CASH!* 💰\n\n"
