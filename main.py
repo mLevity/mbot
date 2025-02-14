@@ -148,10 +148,9 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text = (f"╭👥 Referral System\n" \
                     f"├Referral link: {referral_link}\n" \
                     f"├Referrals: {referrals_count}\n" \
-                    f"╰Referral Earnings: ${referral_earnings}\n"
-                    f"*Get 1$ for every user entered with your link and 10% of their deposits!*"),
-            reply_markup=get_main_menu(),
-            parse_mode=constants.ParseMode.MARKDOWN
+                    f"╰Referral Earnings: ${referral_earnings}\n\n"
+                    f"Get 1$ for every user entered with your link and 10% of their deposits!"),
+            reply_markup=get_main_menu()
         )
     elif text == "📊 Statistics":
         cursor.execute("SELECT balance, total_deposits,  earnings, total_withdraws FROM users WHERE telegram_id=?", (user_id,))
