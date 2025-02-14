@@ -1,11 +1,12 @@
 # config.py
-BOT_TOKEN = "8179936211:AAHXPGFiaykjgVtXczDsUR-GnM0DpuSwmms"
+BOT_TOKEN = "5676131920:AAH19J_Jcyv3qL-pIo7Tc4-SSiF4gWbsQxs"
 ADMINS_ID = [859330334, 5816414679]
 CHANNEL_ID = -1002252306584
 admin_help = (
         "🔒 Admin commands:\n"
         "/view_user [telegram_id|username] - Чекнуть юзера\n"
         "/edit_user [telegram_id|username] [field] [value] - ПЕРЕД ИЗМЕНЕИЕМ ПОСМОТРИ ПОЛЯ ЮЗЕРА\n"
+        "/view_all_users Чекнуть всех юзеров"
         "/delete_user [telegram_id|username] - Delete user\n"
         "/message [telegram_id|username] [message] - Send message to user\n"
         "/message_all [message] - Рассылка\n"
@@ -25,10 +26,10 @@ bonuses_text = (
 )
 rules_text = "RULES: https://telegra.ph/LUMINA-TRADE-RULES-02-12"
 tariffs = {
-        'base': 0.5,  # Базовый тариф (всегда действует)
-        'plus': 1.0,  # Plus: 1% в день
-        'max': 2.0,   # Max: 2% в день
-        'ultra': 3.0  # Ultra: 3% в день
+        'base': 1.0,  # Базовый тариф (всегда действует)
+        'plus': 2.0,  # Plus: 1% в день
+        'max': 5.0,   # Max: 2% в день
+        'ultra': 10.0  # Ultra: 3% в день
     }
 rates = {'BTC': 100000, 'ETH': 3000}
 # Минимальная сумма для вывода

@@ -79,8 +79,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def get_main_menu():
     keyboard = [
-        [KeyboardButton("✅ Withdraw"), KeyboardButton("🔄 Invest")],
-        [KeyboardButton("📈 Change Boost Level")],
+        [KeyboardButton("💸 Withdraw"), KeyboardButton("➕ Invest"), KeyboardButton("🔄 Calculate")],
+        [KeyboardButton("📈 Boost Levels")],
         [KeyboardButton("👥 Referral System"),KeyboardButton("📊 Statistics"), KeyboardButton("🎁 Bonuses")],
         [KeyboardButton("❓ Help"), KeyboardButton("📖 Rules")]
     ]
@@ -91,7 +91,13 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
-    if text == "✅ Withdraw":
+
+    cursor.execute("SELECT balance,tariff, days_left, referrals_count, referral_earnings, total_deposits,  earnings, total_withdraws FROM users WHERE telegram_id=?", (user_id,))
+    balance,tariff, days_left, referrals_count, referral_earnings, total_deposits, earnings, total_withdraws = cursor.fetchone()
+    percent = config.tariffs[tariff]
+    if days_left == 0:
+        days_left = '∞'
+    if text == "💸 Withdraw":
         user_data['state'] = 'withdraw'
         await context.bot.send_message(
             chat_id=chat_id,
@@ -99,7 +105,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=get_withdrawal_menu(),
             parse_mode=constants.ParseMode.MARKDOWN
         )
-    elif text == "🔄 Invest":
+    elif text == "➕ Invest":
         user_data['state'] = 'deposit'
         await context.bot.send_message(
             chat_id=chat_id,
@@ -107,40 +113,56 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=get_payments_menu(),
             parse_mode=constants.ParseMode.MARKDOWN
         )
-    elif text == "📈 Change Boost Level":
+    elif text == "🔄 Calculate":
         await context.bot.send_message(
-            chat_id=chat_id,
-            text="*📈 Select a boost level:*",
-            reply_markup=get_tariff_menu(),
-            parse_mode=constants.ParseMode.MARKDOWN
-        )
-    elif text == "👥 Referral System":
-        referral_link = f"https://t.me/{context.bot.username}?start={user_id}"
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"*👥 Your referral link:*\n`{referral_link}`\n\n*Get 1$ for every user entered with your link!*",
-            reply_markup=get_main_menu(),
-            parse_mode=constants.ParseMode.MARKDOWN
-        )
-    elif text == "📊 Statistics":
-        cursor.execute("SELECT balance,tariff, days_left, referrals_count, referral_earnings, total_deposits,  earnings, total_withdraws FROM users WHERE telegram_id=?", (user_id,))
-        balance,tariff, days_left, referrals_count, referral_earnings, total_deposits, earnings, total_withdraws = cursor.fetchone()
-        
+                chat_id=chat_id,
+                text = (
+                    f"Here you can calculate your investments with our company.\n\n"
+                    f"Please, enter *start balance*, *growth*, *days*: \n(Example: 100 2 20)"
+                ),
+                parse_mode=constants.ParseMode.MARKDOWN
+            )
+        context.user_data['state'] = 'calculate'
+    elif text == "📈 Boost Levels":
+        cursor.execute("SELECT tariff, days_left FROM users WHERE telegram_id=?", (user_id,))
+        tariff, days_left = cursor.fetchone()
         percent = config.tariffs[tariff]
         if days_left == 0:
             days_left = '∞'
         await context.bot.send_message(
             chat_id=chat_id,
-            text = f"💲 *Balance:* ${balance}\n" \
-                f"🚀 *Boost Level:* {tariff}\n" \
-                f"⭐ *Growth:* {percent}%\n" \
-                f"⏳ *Days left:* {days_left}\n" \
-                f"👥 *Referrals:* {referrals_count}\n" \
-                f"💵 *Referral Earnings:* ${referral_earnings}\n" \
-                f"📊 *Total Deposits:* ${total_deposits}\n" \
-                f"📈 *Earnings:* ${earnings}\n" \
-                f"💰 *Total withdrawals:* ${total_withdraws}",
+            text = (f"╭📈 Boost Levels\n" \
+                    f"├Current boost Level: {tariff}\n" \
+                    f"├Growth: {percent}% per day\n" \
+                    f"╰Days left: {days_left}\n"
+                    f"*Select a new boost level:*"),
+            reply_markup=get_tariff_menu(),
             parse_mode=constants.ParseMode.MARKDOWN
+        )
+    elif text == "👥 Referral System":
+        cursor.execute("SELECT referrals_count, referral_earnings FROM users WHERE telegram_id=?", (user_id,))
+        referrals_count, referral_earnings = cursor.fetchone()
+        referral_link = f"https://t.me/{context.bot.username}?start={user_id}"
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text = (f"╭👥 Referral System\n" \
+                    f"├Referral link: {referral_link}\n" \
+                    f"├Referrals: {referrals_count}\n" \
+                    f"╰Referral Earnings: ${referral_earnings}\n"
+                    f"*Get 1$ for every user entered with your link and 10% of their deposits!*"),
+            reply_markup=get_main_menu(),
+            parse_mode=constants.ParseMode.MARKDOWN
+        )
+    elif text == "📊 Statistics":
+        cursor.execute("SELECT balance, total_deposits,  earnings, total_withdraws FROM users WHERE telegram_id=?", (user_id,))
+        balance, total_deposits, earnings, total_withdraws = cursor.fetchone()
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text = (f"╭📊Statistics\n" \
+                    f"├Balance: {balance}\n" \
+                    f"├Total Deposits: {total_deposits}\n" \
+                    f"├Earnings: {earnings}\n" \
+                    f"╰Total withdrawals: {total_withdraws}")
         )
     elif text == "❓ Help":
         await context.bot.send_message(
@@ -202,7 +224,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     text=f"*✅ Withdrawal of {amount} {currency} successful!*\nYour balance has been updated.\nContact support to continue",
                     parse_mode=constants.ParseMode.MARKDOWN
                 )
-
+                context.user_data['state'] = None
             except ValueError:
                 await context.bot.send_message(
                     chat_id=update.message.chat_id,
@@ -247,14 +269,28 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         reply_markup=InlineKeyboardMarkup(keyboard),
                         parse_mode=constants.ParseMode.MARKDOWN
                     )
-                context.user_data.pop('is_deposit', None)
+                context.user_data['state'] = None
             except ValueError:
                 await context.bot.send_message(
                     chat_id=update.message.chat_id,
                     text="*⚠️ Invalid amount. Please enter a positive number.*",
                     parse_mode=constants.ParseMode.MARKDOWN
                 )
-
+        elif context.user_data['state'] == 'calculate':
+            try:
+                numbers = list(map(int,update.message.text.split()))
+                print(numbers)
+                if len(numbers) != 3:
+                    await update.message.reply_text("❌ Please enter exactly three numbers separated by spaces.")
+                    return
+                if not all(number>0 for number in numbers) :
+                    await update.message.reply_text("❌ All numbers must be positive. Please try again.")
+                    return
+                result_balance = numbers[0]*((1+numbers[1]/100)**numbers[2])
+                await update.message.reply_text(f"Result balance: ${result_balance:.2f}")
+                context.user_data['state'] = None
+            except ValueError:
+                await update.message.reply_text("❌ An error occurred while processing the numbers. Please check your input.")
         else:
             await context.bot.send_message(
                 chat_id=update.message.chat_id,
@@ -263,7 +299,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     else:
-        await update.message.reply_text("Unknown command. PLease use buttons")
+        await update.message.reply_text("Unknown command. Please use buttons")
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -348,29 +384,54 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['withdraw_currency'] = currency
     elif query.data in ['buy_plus', 'buy_max', 'buy_ultra']:
         user_id = query.from_user.id
+        tariff_name = query.data.split('_')[1]
         cursor.execute("SELECT balance FROM users WHERE telegram_id=?", (user_id,))
         balance = cursor.fetchone()[0]
+
         prices = {
             'plus': 50,  # Plus: $50
             'max': 100,  # Max: $100
             'ultra': 200  # Ultra: $200
         }
-        days = {
+        days_ = {
             'plus': 20,  # Plus: 20
             'max': 10,   # Max: 10 
             'ultra': 5   # Ultra: 5
         }
-        tariff_name = query.data.split('_')[1]
         price = prices[tariff_name]
+        days = days_[tariff_name]
+
+        context.user_data['tariff_name'] = tariff_name
+        context.user_data['price'] = price
+        context.user_data['days'] = days
+        context.user_data['balance'] = balance
+        reply_text = (
+            f"You want to buy *{tariff_name}* boost level.\n"
+            f"After buying you will get *{config.tariffs[tariff_name]}%* investments growth per day for *{days} days*. It costs *${price}*.\n\n"
+            f"Are you sure?"
+            )
+        keyboard = [[InlineKeyboardButton("✅ Confirm", callback_data='confirm_buying')]]
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=reply_text,
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            parse_mode=constants.ParseMode.MARKDOWN
+        )
+        get_main_menu()
+    elif query.data == 'confirm_buying':
+        user_id = query.from_user.id
+        tariff_name = context.user_data['tariff_name']
+        price = context.user_data['price']
+        days = context.user_data['days']
+        balance = context.user_data['balance']
         if balance >= price:
             message = f"✅You successfully bought {tariff_name.upper()} boost level!"
             cursor.execute("UPDATE users SET balance=balance-?, tariff=?, days_left=? WHERE telegram_id=?",
-                           (price, tariff_name, days[tariff_name], user_id))
+                           (price, tariff_name, days, user_id))
             conn.commit()
             await query.message.reply_text(message)
         else:
             await query.message.reply_text("⚠️Insufficient funds on your balance!")
-        get_main_menu()
     elif query.data == 'back_to_main':
         await context.bot.send_message(
             chat_id=chat_id,
@@ -381,27 +442,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def get_payments_menu():
     keyboard = [
-        [InlineKeyboardButton("USDT[TRC20]", callback_data='choose_currency_usdt')],
-        [InlineKeyboardButton("BTC", callback_data='choose_currency_btc')],
-        [InlineKeyboardButton("ETH", callback_data='choose_currency_eth')],
+        [InlineKeyboardButton("USDT[TRC20]", callback_data='choose_currency_usdt'),InlineKeyboardButton("BTC", callback_data='choose_currency_btc'),InlineKeyboardButton("ETH", callback_data='choose_currency_eth')],
         [InlineKeyboardButton("🔙 Back", callback_data='back_to_main')]
     ]
     return InlineKeyboardMarkup(keyboard)
 def get_withdrawal_menu():
     keyboard = [
-        [InlineKeyboardButton("USDT", callback_data='withdraw_currency_usdt')],
-        [InlineKeyboardButton("BTC", callback_data='withdraw_currency_btc')],
-        [InlineKeyboardButton("ETH", callback_data='withdraw_currency_eth')],
+        [InlineKeyboardButton("USDT", callback_data='withdraw_currency_usdt'),InlineKeyboardButton("BTC", callback_data='withdraw_currency_btc'),InlineKeyboardButton("ETH", callback_data='withdraw_currency_eth')],
         [InlineKeyboardButton("🔙 Back", callback_data='back_to_main')]
     ]
     return InlineKeyboardMarkup(keyboard)
-
-
 def get_tariff_menu():
     keyboard = [
-        [InlineKeyboardButton("Plus ($50)", callback_data='buy_plus')],
-        [InlineKeyboardButton("Max ($100)", callback_data='buy_max')],
-        [InlineKeyboardButton("Ultra ($200)", callback_data='buy_ultra')],
+        [InlineKeyboardButton("Plus ($50)", callback_data='buy_plus'),InlineKeyboardButton("Max ($100)", callback_data='buy_max'),InlineKeyboardButton("Ultra ($200)", callback_data='buy_ultra')],
         [InlineKeyboardButton("🔙 Back", callback_data='back_to_main')]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -480,7 +533,19 @@ async def view_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Total withdrawals: ${total_withdraws}",
         parse_mode=constants.ParseMode.MARKDOWN
     )
-
+async def view_all_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id not in config.ADMINS_ID:
+        await update.message.reply_text("❌ Access denied.")
+        return
+    cursor.execute("SELECT username, balance, total_deposits FROM users")
+    users = cursor.fetchall()
+    if users:
+        message = "📝 Список всех пользователей:\n\n"
+        for user in users:
+            username, balance, total_deposits = user
+            message += f"Username: @{username};Баланс: {balance}$; Общие депозиты: {total_deposits} $\n\n"
+        else:
+            message = ",No users found."
 async def edit_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in config.ADMINS_ID:
         await update.message.reply_text("❌ Access denied.")
@@ -577,6 +642,8 @@ def main():
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('admin_lvt', admin_panel))
     application.add_handler(CommandHandler('view_user', view_user))
+    application.add_handler(CommandHandler('view_user', view_all_users))
+    
     application.add_handler(CommandHandler('edit_user', edit_user))
     application.add_handler(CommandHandler('delete_user', delete_user))
     application.add_handler(CommandHandler('message', send_message))
